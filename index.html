@@ -1,0 +1,821 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuizQuake - BrainStorm Arena</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #0f172a;
+    color: #f1f5f9;
+}
+
+header {
+    background: #1e293b;
+    padding: 20px;
+    text-align: center;
+    border-bottom: 2px solid #6366f1;
+}
+
+header h1 {
+    color: #818cf8;
+    font-size: 28px;
+}
+
+header p {
+    margin-top: 8px;
+    color: #cbd5e1;
+}
+
+.container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+.card {
+    background: #1e293b;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+.stats {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.stat {
+    flex: 1;
+    min-width: 120px;
+    background: #334155;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.stat h3 {
+    color: #a5b4fc;
+    margin-bottom: 8px;
+}
+
+.stat p {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+button {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: bold;
+    margin-top: 10px;
+    transition: 0.2s;
+}
+
+.primary {
+    background: #6366f1;
+    color: white;
+}
+
+.primary:hover {
+    background: #4f46e5;
+}
+
+.secondary {
+    background: #334155;
+    color: white;
+}
+
+.secondary:hover {
+    background: #475569;
+}
+
+#quizArea, #resultArea {
+    display: none;
+}
+
+.progress-container {
+    background: #334155;
+    height: 10px;
+    border-radius: 10px;
+    margin: 15px 0;
+}
+
+.progress {
+    background: #818cf8;
+    height: 10px;
+    width: 0%;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+
+.question {
+    font-size: 21px;
+    margin: 20px 0;
+    line-height: 1.5;
+}
+
+.option {
+    display: block;
+    background: #334155;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.option:hover {
+    border-color: #818cf8;
+}
+
+.option input {
+    margin-right: 10px;
+}
+
+.option.selected {
+    border-color: #818cf8;
+    background: #3c4770;
+}
+
+.badge {
+    display: inline-block;
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-weight: bold;
+    margin: 5px;
+}
+
+.easy {
+    background: #166534;
+    color: #bbf7d0;
+}
+
+.medium {
+    background: #92400e;
+    color: #fde68a;
+}
+
+.hard {
+    background: #991b1b;
+    color: #fecaca;
+}
+
+.info {
+    color: #cbd5e1;
+    margin: 10px 0;
+}
+
+#timer {
+    color: #f87171;
+    font-weight: bold;
+}
+
+.result-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.result-grid > div {
+    flex: 1;
+    min-width: 250px;
+}
+
+.topic-row {
+    margin: 15px 0;
+}
+
+.topic-row p {
+    margin-bottom: 7px;
+}
+
+.topic-bar {
+    height: 12px;
+    background: #334155;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.topic-fill {
+    height: 100%;
+    background: #818cf8;
+    border-radius: 10px;
+}
+
+.review-item {
+    background: #334155;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 12px 0;
+}
+
+.correct {
+    color: #4ade80;
+}
+
+.incorrect {
+    color: #f87171;
+}
+
+canvas {
+    width: 100%;
+    max-width: 450px;
+    height: auto;
+    display: block;
+    margin: auto;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    color: #94a3b8;
+}
+
+@media(max-width:600px) {
+    .container {
+        padding: 12px;
+    }
+
+    .card {
+        padding: 18px;
+    }
+
+    .question {
+        font-size: 18px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>⚡ QuizQuake</h1>
+    <p>BrainStorm Arena – Adaptive Quiz Challenge</p>
+</header>
+
+<div class="container">
+
+<!-- HOME -->
+<div class="card" id="homeArea">
+    <h2>Welcome to BrainStorm Arena!</h2>
+    <p class="info">
+        Test your Computer Science knowledge. Questions automatically adjust
+        according to your performance.
+    </p>
+
+    <div class="stats">
+        <div class="stat">
+            <h3>Questions</h3>
+            <p>10</p>
+        </div>
+        <div class="stat">
+            <h3>Topics</h3>
+            <p>4</p>
+        </div>
+        <div class="stat">
+            <h3>Time</h3>
+            <p>2 Min</p>
+        </div>
+    </div>
+
+    <button class="primary" onclick="startQuiz()">Start Quiz</button>
+
+    <h3 style="margin-top:25px">Previous Attempts</h3>
+    <div id="history"></div>
+</div>
+
+<!-- QUIZ -->
+<div class="card" id="quizArea">
+
+    <div class="stats">
+        <div class="stat">
+            <h3>Question</h3>
+            <p id="questionNumber">1/10</p>
+        </div>
+        <div class="stat">
+            <h3>Difficulty</h3>
+            <p><span id="difficultyBadge" class="badge medium">Medium</span></p>
+        </div>
+        <div class="stat">
+            <h3>Timer</h3>
+            <p id="timer">02:00</p>
+        </div>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress" id="progress"></div>
+    </div>
+
+    <p id="topicLabel" class="info"></p>
+    <h2 class="question" id="questionText"></h2>
+
+    <div id="options"></div>
+
+    <button class="primary" onclick="submitAnswer()">Submit Answer</button>
+</div>
+
+<!-- RESULTS -->
+<div class="card" id="resultArea">
+    <h2>🎉 Quiz Completed!</h2>
+    <div class="stats">
+        <div class="stat">
+            <h3>Score</h3>
+            <p id="score"></p>
+        </div>
+        <div class="stat">
+            <h3>Accuracy</h3>
+            <p id="accuracy"></p>
+        </div>
+        <div class="stat">
+            <h3>Correct</h3>
+            <p id="correctCount"></p>
+        </div>
+    </div>
+
+    <div class="result-grid">
+        <div>
+            <h3>Topic Performance</h3>
+            <div id="topicResults"></div>
+        </div>
+        <div>
+            <h3>Weak Topic Radar</h3>
+            <canvas id="radar" width="400" height="400"></canvas>
+        </div>
+    </div>
+
+    <h3 style="margin-top:25px">Solution Review</h3>
+    <div id="review"></div>
+
+    <button class="primary" onclick="startQuiz()">Play Again</button>
+    <button class="secondary" onclick="showHome()">Home</button>
+</div>
+
+</div>
+
+<footer>
+    QuizQuake | BrainStorm Arena | Adaptive Learning System
+</footer>
+
+<script>
+const questions = [
+    {
+        topic: "Data Structures",
+        difficulty: "Easy",
+        q: "Which data structure follows the FIFO principle?",
+        options: ["Stack", "Queue", "Tree", "Graph"],
+        answer: 1,
+        explanation: "Queue follows First In, First Out (FIFO)."
+    },
+    {
+        topic: "Algorithms",
+        difficulty: "Easy",
+        q: "What is the time complexity of linear search?",
+        options: ["O(1)", "O(log n)", "O(n)", "O(n²)"],
+        answer: 2,
+        explanation: "Linear search may inspect every element, so its complexity is O(n)."
+    },
+    {
+        topic: "Operating Systems",
+        difficulty: "Easy",
+        q: "Which component manages process execution?",
+        options: ["Compiler", "Operating System", "Browser", "Database"],
+        answer: 1,
+        explanation: "The operating system manages processes and CPU scheduling."
+    },
+    {
+        topic: "Networks",
+        difficulty: "Easy",
+        q: "What does IP stand for?",
+        options: [
+            "Internet Process",
+            "Internal Protocol",
+            "Internet Protocol",
+            "Information Program"
+        ],
+        answer: 2,
+        explanation: "IP stands for Internet Protocol."
+    },
+    {
+        topic: "Data Structures",
+        difficulty: "Medium",
+        q: "Which data structure is commonly used to implement recursion?",
+        options: ["Queue", "Stack", "Array only", "Graph"],
+        answer: 1,
+        explanation: "The call stack stores function calls during recursion."
+    },
+    {
+        topic: "Algorithms",
+        difficulty: "Medium",
+        q: "Which sorting algorithm has average O(n log n) complexity?",
+        options: ["Bubble Sort", "Selection Sort", "Merge Sort", "Linear Sort"],
+        answer: 2,
+        explanation: "Merge Sort has O(n log n) time complexity."
+    },
+    {
+        topic: "Operating Systems",
+        difficulty: "Medium",
+        q: "What is a deadlock?",
+        options: [
+            "A process running quickly",
+            "A memory allocation method",
+            "Processes waiting indefinitely for resources",
+            "A type of file"
+        ],
+        answer: 2,
+        explanation: "Deadlock occurs when processes wait indefinitely for resources held by each other."
+    },
+    {
+        topic: "Networks",
+        difficulty: "Medium",
+        q: "Which protocol is connection-oriented?",
+        options: ["UDP", "TCP", "IP", "ARP"],
+        answer: 1,
+        explanation: "TCP establishes a connection and provides reliable delivery."
+    },
+    {
+        topic: "Operating Systems",
+        difficulty: "Hard",
+        q: "Which algorithm can prevent deadlock by checking safe resource allocation?",
+        options: [
+            "Round Robin",
+            "Banker's Algorithm",
+            "FIFO",
+            "Binary Search"
+        ],
+        answer: 1,
+        explanation: "Banker's Algorithm checks safe states before granting resource requests."
+    },
+    {
+        topic: "Algorithms",
+        difficulty: "Hard",
+        q: "What is the worst-case time complexity of Quick Sort?",
+        options: ["O(n)", "O(log n)", "O(n log n)", "O(n²)"],
+        answer: 3,
+        explanation: "Quick Sort can degrade to O(n²) when partitions are highly unbalanced."
+    }
+];
+
+let quizQuestions = [];
+let current = 0;
+let score = 0;
+let correctCount = 0;
+let difficulty = 1;
+let consecutiveCorrect = 0;
+let consecutiveWrong = 0;
+let answers = [];
+let topicScores = {};
+let timer = 120;
+let timerInterval;
+let selectedOption = null;
+let questionStartTime = 0;
+
+const levels = ["Easy", "Medium", "Hard"];
+
+function startQuiz() {
+    clearInterval(timerInterval);
+
+    quizQuestions = [...questions];
+    current = 0;
+    score = 0;
+    correctCount = 0;
+    difficulty = 1;
+    consecutiveCorrect = 0;
+    consecutiveWrong = 0;
+    answers = [];
+    topicScores = {};
+    timer = 120;
+
+    questions.forEach(q => {
+        if (!topicScores[q.topic]) {
+            topicScores[q.topic] = { correct: 0, total: 0 };
+        }
+    });
+
+    document.getElementById("homeArea").style.display = "none";
+    document.getElementById("resultArea").style.display = "none";
+    document.getElementById("quizArea").style.display = "block";
+
+    timerInterval = setInterval(updateTimer, 1000);
+    showQuestion();
+}
+
+function updateTimer() {
+    timer--;
+
+    let minutes = Math.floor(timer / 60);
+    let seconds = timer % 60;
+
+    document.getElementById("timer").textContent =
+        String(minutes).padStart(2, "0") + ":" +
+        String(seconds).padStart(2, "0");
+
+    if (timer <= 0) {
+        finishQuiz();
+    }
+}
+
+function showQuestion() {
+    if (current >= quizQuestions.length) {
+        finishQuiz();
+        return;
+    }
+
+    selectedOption = null;
+    questionStartTime = Date.now();
+
+    const q = quizQuestions[current];
+
+    document.getElementById("questionNumber").textContent =
+        (current + 1) + "/" + quizQuestions.length;
+
+    document.getElementById("progress").style.width =
+        ((current / quizQuestions.length) * 100) + "%";
+
+    document.getElementById("difficultyBadge").textContent = levels[difficulty];
+    document.getElementById("difficultyBadge").className =
+        "badge " + levels[difficulty].toLowerCase();
+
+    document.getElementById("topicLabel").textContent =
+        "Topic: " + q.topic + " | Question Level: " + q.difficulty;
+
+    document.getElementById("questionText").textContent = q.q;
+
+    const optionsDiv = document.getElementById("options");
+    optionsDiv.innerHTML = "";
+
+    q.options.forEach((option, index) => {
+        const label = document.createElement("label");
+        label.className = "option";
+
+        label.innerHTML = `
+            <input type="radio" name="answer" value="${index}">
+            ${option}
+        `;
+
+        label.querySelector("input").addEventListener("change", () => {
+            selectedOption = index;
+
+            document.querySelectorAll(".option").forEach(o =>
+                o.classList.remove("selected")
+            );
+
+            label.classList.add("selected");
+        });
+
+        optionsDiv.appendChild(label);
+    });
+}
+
+function submitAnswer() {
+    if (selectedOption === null) {
+        alert("Please select an answer!");
+        return;
+    }
+
+    processAnswer(selectedOption);
+}
+
+function processAnswer(selected) {
+    const q = quizQuestions[current];
+    const isCorrect = selected === q.answer;
+    const timeSpent = Math.round((Date.now() - questionStartTime) / 1000);
+
+    topicScores[q.topic].total++;
+
+    if (isCorrect) {
+        score += 10;
+        correctCount++;
+        topicScores[q.topic].correct++;
+
+        consecutiveCorrect++;
+        consecutiveWrong = 0;
+
+        // Increase difficulty after 2 consecutive correct answers
+        if (consecutiveCorrect >= 2 && difficulty < 2) {
+            difficulty++;
+            consecutiveCorrect = 0;
+        }
+    } else {
+        consecutiveWrong++;
+        consecutiveCorrect = 0;
+
+        // Decrease difficulty after an incorrect answer
+        if (difficulty > 0) {
+            difficulty--;
+        }
+    }
+
+    answers.push({
+        question: q.q,
+        topic: q.topic,
+        options: q.options,
+        selected: selected,
+        correct: q.answer,
+        isCorrect: isCorrect,
+        explanation: q.explanation,
+        time: timeSpent,
+        difficulty: q.difficulty
+    });
+
+    current++;
+    showQuestion();
+}
+
+function finishQuiz() {
+    clearInterval(timerInterval);
+
+    document.getElementById("quizArea").style.display = "none";
+    document.getElementById("resultArea").style.display = "block";
+
+    const accuracy = Math.round((correctCount / quizQuestions.length) * 100);
+
+    document.getElementById("score").textContent = score + "/100";
+    document.getElementById("accuracy").textContent = accuracy + "%";
+    document.getElementById("correctCount").textContent =
+        correctCount + "/" + quizQuestions.length;
+
+    showTopicResults();
+    drawRadar();
+    showReview();
+    saveHistory(score, accuracy);
+}
+
+function showTopicResults() {
+    const div = document.getElementById("topicResults");
+    div.innerHTML = "";
+
+    Object.keys(topicScores).forEach(topic => {
+        const data = topicScores[topic];
+        const percent = data.total === 0 ? 0 :
+            Math.round((data.correct / data.total) * 100);
+
+        div.innerHTML += `
+            <div class="topic-row">
+                <p>${topic}: ${percent}% (${data.correct}/${data.total})</p>
+                <div class="topic-bar">
+                    <div class="topic-fill" style="width:${percent}%"></div>
+                </div>
+            </div>
+        `;
+    });
+}
+
+function drawRadar() {
+    const canvas = document.getElementById("radar");
+    const ctx = canvas.getContext("2d");
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const topics = Object.keys(topicScores);
+    const values = topics.map(topic => {
+        const d = topicScores[topic];
+        return d.total === 0 ? 0 : d.correct / d.total;
+    });
+
+    const centerX = 200;
+    const centerY = 200;
+    const radius = 130;
+    const count = topics.length;
+
+    // Draw radar grid
+    for (let level = 1; level <= 4; level++) {
+        ctx.beginPath();
+
+        for (let i = 0; i < count; i++) {
+            const angle = (Math.PI * 2 * i / count) - Math.PI / 2;
+            const r = radius * level / 4;
+            const x = centerX + r * Math.cos(angle);
+            const y = centerY + r * Math.sin(angle);
+
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+
+        ctx.closePath();
+        ctx.strokeStyle = "#475569";
+        ctx.stroke();
+    }
+
+    // Draw axes and labels
+    topics.forEach((topic, i) => {
+        const angle = (Math.PI * 2 * i / count) - Math.PI / 2;
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = "#475569";
+        ctx.stroke();
+
+        ctx.fillStyle = "#e2e8f0";
+        ctx.font = "12px Arial";
+        ctx.textAlign = "center";
+
+        const labelX = centerX + (radius + 25) * Math.cos(angle);
+        const labelY = centerY + (radius + 25) * Math.sin(angle);
+
+        ctx.fillText(topic, labelX, labelY);
+    });
+
+    // Draw performance area
+    ctx.beginPath();
+
+    values.forEach((value, i) => {
+        const angle = (Math.PI * 2 * i / count) - Math.PI / 2;
+        const r = radius * value;
+        const x = centerX + r * Math.cos(angle);
+        const y = centerY + r * Math.sin(angle);
+
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    });
+
+    ctx.closePath();
+    ctx.fillStyle = "rgba(129, 140, 248, 0.3)";
+    ctx.fill();
+    ctx.strokeStyle = "#818cf8";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+}
+
+function showReview() {
+    const reviewDiv = document.getElementById("review");
+    reviewDiv.innerHTML = "";
+
+    answers.forEach((a, index) => {
+        reviewDiv.innerHTML += `
+            <div class="review-item">
+                <h4>Question ${index + 1}: ${a.question}</h4>
+                <p class="info">Topic: ${a.topic} | Difficulty: ${a.difficulty}
+                | Time: ${a.time}s</p>
+                <p class="${a.isCorrect ? 'correct' : 'incorrect'}">
+                    Your Answer: ${a.options[a.selected]}
+                    ${a.isCorrect ? '✓ Correct' : '✗ Incorrect'}
+                </p>
+                <p class="correct">Correct Answer: ${a.options[a.correct]}</p>
+                <p class="info">Explanation: ${a.explanation}</p>
+            </div>
+        `;
+    });
+}
+
+function saveHistory(score, accuracy) {
+    const history = JSON.parse(localStorage.getItem("quizHistory") || "[]");
+
+    history.unshift({
+        date: new Date().toLocaleString(),
+        score: score,
+        accuracy: accuracy
+    });
+
+    localStorage.setItem("quizHistory", JSON.stringify(history.slice(0, 10)));
+}
+
+function loadHistory() {
+    const history = JSON.parse(localStorage.getItem("quizHistory") || "[]");
+    const div = document.getElementById("history");
+
+    if (history.length === 0) {
+        div.innerHTML = "<p class='info'>No attempts yet.</p>";
+        return;
+    }
+
+    div.innerHTML = history.map(h => `
+        <div class="review-item">
+            <p>${h.date}</p>
+            <p>Score: ${h.score}/100 | Accuracy: ${h.accuracy}%</p>
+        </div>
+    `).join("");
+}
+
+function showHome() {
+    clearInterval(timerInterval);
+    document.getElementById("quizArea").style.display = "none";
+    document.getElementById("resultArea").style.display = "none";
+    document.getElementById("homeArea").style.display = "block";
+    loadHistory();
+}
+
+loadHistory();
+</script>
+
+</body>
+</html>
